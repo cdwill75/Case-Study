@@ -1,0 +1,609 @@
+---
+title: "NFL QB Case Study"
+author: "Cornelius Williams"
+date: "2023-05-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Questions to be answered
+
+1. Does it take a good defense to win the Superbowl?
+1. Does it take a great quarterback play to win the Superbowl?
+1. Does it matter which round a team drafts a quarterback?
+1. Can a team draft a quarterback in a later round and pair them with a good defense to win?
+1. Which rounds are quarterbacks that make it to the playoffs and Superbowl drafted in?
+
+### In my data analysis case study I set out to answer these questions by gathering data over a twenty year period that included information listed below.
+* NFL defensive stats 
+* Quarterback regular season and playoff stats 
+* Superbowl team and quarterback participants 
+* Rounds that each quarterback was drafted 
+
+
+
+```{r loading packages for gathering data and saving to local file, message=FALSE, warning=FALSE, include=FALSE}
+#install.packages("rvest", repos = "http://cran.us.r-project.org")
+install.packages("tidyverse", repos = 'http://cran.us.r-project.org')
+#install.packages("xml2", repos = "http://cran.us.r-project.org")
+install.packages("readxl", repos = "http://cran.us.r-project.org")
+#install.packages("xlsx", repos = "http://cran.us.r-project.org")
+
+
+#library(rvest)
+library(tidyverse)
+#library(xml2)
+library(readxl)
+#library(xlsx)
+
+
+```
+```{r scrape website for data, eval=FALSE, include=FALSE, paged.print=FALSE}
+#scrape defensive stats for multiple seasons and saved html to local folder
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/defense")
+for(i in 2002:2021){
+  defense_url <- read_html(paste0("https://www.pro-football-reference.com/years/",i,"/opp.htm"))
+  defense_stats <- defense_url %>%
+    write_html(paste0("defense",i,".HTML"))
+}
+
+#scrape passing stats multiple seasons and saved html to local folder
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/passing")
+for(i in 2002:2021){
+  passing_url <- read_html(paste0("https://www.espn.com/nfl/stats/player/_/season/",i,"/seasontype/3/table/passing/sort/QBRating/dir/desc"))
+  passing_stats <- passing_url %>%
+    write_html(paste0("passing",i,".HTML"))
+}
+
+#scrape regualar season passing stats multiple seasons and saved html to local folder
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/reg_season")
+for(i in 2002:2021){
+  regsea_url <- read_html(paste0("https://www.espn.com/nfl/stats/player/_/season/",i,"/seasontype/2/table/passing/sort/QBRating/dir/desc"))
+  regsea_stats <- regsea_url %>%
+    write_html(paste0("regseason",i,".HTML"))
+}
+
+#scrape draft stats multiple seasons and saved html to local folder
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/draft")
+for (i in 1986:2021) {
+  draft_url <- read_html(paste0("https://www.pro-football-reference.com/years/",i,"/draft.htm"))
+  draft_stats <- draft_url %>%
+    write_html(paste0("draft",i,".HTML"))
+}
+
+#scrape superbowl teams and saved html to local folder
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/superbowl")
+sb_url <- read_html("https://en.wikipedia.org/wiki/List_of_Super_Bowl_starting_quarterbacks")
+superbowl <- sb_url %>%
+  write_html("suberbowl.HTML")
+}
+
+#scrape  team abbreviations and saved html to local folder
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/Team_abbreviations")
+teamAbr_url < read_html("https://en.wikipedia.org/wiki/Wikipedia:WikiProject_National_Football_League/National_Football_League_team_abbreviations")
+Teams <- teamAbr_url %>%
+  write_html("Team_abreviations.csv")
+}
+```
+```{r load data from local files into dataframes, eval=FALSE, include=FALSE}
+
+#Use For loop to take locally save files and extract tables to make data frame
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/playoffs")
+file_playoffs <- list.files()
+QBPlayoffs <- list()
+
+for(file in file_playoffs){
+  read_html(file) -> playoffs
+  
+  
+  playoffs %>% 
+    html_nodes("table") %>% 
+    html_table() -> playoff_stats
+  
+  playoff_stats %>% 
+    as.data.frame() -> playoff_stats
+  playoff_stats$Year <- file
+  
+  
+  
+  QBPlayoffs[[length(QBPlayoffs) +1]] <- playoff_stats
+}
+
+
+QBPlayoffs1 <- bind_rows(QBPlayoffs[1:4], QBPlayoffs[6], QBPlayoffs[8], QBPlayoffs[12:14], 
+                         QBPlayoffs[17:18], QBPlayoffs[21] ) #Combine all the dataframes into one.
+
+QBPlayoffs2 <- bind_rows(QBPlayoffs[5], QBPlayoffs[7], QBPlayoffs[9:11], QBPlayoffs[15:16], 
+                         QBPlayoffs[19], QBPlayoffs[20] ) #Combine all the dataframes into one.
+
+QBPlayoffs2$YDS = as.integer(QBPlayoffs2$YDS) #change the data type in the YDS column to match the same column in QBPlayoffs1
+QBPlayoffs <- rbind(QBPlayoffs1, QBPlayoffs2) #combine data frames to prepare for cleaning 
+
+#Remove data frames and list
+rm(QBPlayoffs1, QBPlayoffs2, playoff_stats, playoffs)
+
+#Use For loop to take locally save files and extract tables to make data frame
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/reg_season")
+file_regsea <- list.files()
+
+Regsea <- list()
+
+for(file in file_regsea){
+  read_html(file) -> passing
+  
+  passing %>% 
+    html_nodes("table") %>% 
+    html_table() -> regsea_stats
+  #drafts
+  regsea_stats %>% 
+    as.data.frame() -> regsea_stats
+  regsea_stats$Year <- file
+  
+  Regsea[[length(Regsea) +1]] <- regsea_stats
+  
+  
+}
+Regsea <- bind_rows(Regsea) 
+
+#Remove data frames and list
+rm(regsea_stats, passing)
+
+#Use For loop to take locally save files and extract tables to make data frame
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/draft")
+file_draft <- list.files()
+Draft <- list()
+
+for(file in file_draft){
+  read_html(file) -> picks
+  
+  picks %>% 
+    html_nodes("#drafts") %>% 
+    html_table() -> draft_stats
+  
+  draft_stats %>% 
+    as.data.frame() -> draft_stats
+    draft_stats$Year <- file
+  
+  Draft[[length(Draft) +1]] <- draft_stats
+  
+  
+}
+Draft <- bind_rows(Draft) #Combine all the dataframes into one.
+
+#Remove data frames and list
+rm(picks, draft_stats)
+
+#Use For loop to take locally save files and extract tables to make data frame
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/defense")
+file_defense <- list.files()
+Defense <- list()
+
+for(file in file_defense){
+  read_html(file) -> defense
+  
+  defense %>% 
+    html_nodes("#team_stats") %>% 
+    html_table() -> defense_stats
+  
+  defense_stats %>% 
+    as.data.frame() -> defense_stats
+  defense_stats$Year <- file
+  
+  Defense[[length(Defense) +1]] <- defense_stats
+  
+}
+
+Defense <- bind_rows(Defense) #Combine all the dataframes into one.
+
+#Remove data frames and list
+rm(defense, defense_stats)
+
+
+#Read local csv file in and converted into data frame
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/Team_abreviations")
+Teams <- read.csv("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/Team_abreviations/teams.csv")
+
+setwd("C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/superbowl")
+file_superbowl <- list()
+
+read_html("suberbowl.HTML") -> sb
+sb %>% 
+  html_nodes("table") %>%
+  html_table(fill = TRUE) -> sb
+
+# Convert list to dataframe using data.frame()
+sb <- data.frame(sb[[2]])
+```
+```{r cleaning the dataframe and merging dataframes into single dataframe, eval=FALSE, include=FALSE}
+#---------------Cleaning'Teams"data frame-------------------------------------------------------------------------
+Teams <- Teams %>% 
+  select(-ID, -Conference, -Division)
+
+Teams <- rename(Teams, team_code=Abbreviation)
+Teams <- rename(Teams, team=Name)
+
+
+#----------------Cleaning "Defense"data frame-----------------------------------------------------------------------
+Defense_clean <- Defense
+
+
+
+#Removed characters and punctuation from Year column
+Defense_clean$Year <- gsub("defense", "", Defense_clean$Year) 
+Defense_clean$Year <- gsub(".HTML", "", Defense_clean$Year)
+
+
+
+#Renaming some of the column names
+Defense_clean <- dplyr::rename(Defense_clean, team=Var.2, 
+                        defense_rank=Var.1, year=Year)
+
+# cleaning data frame by removing unecessary rows using value in the row
+Defense_clean <- Defense_clean[!(Defense_clean$defense_rank == "Rk"),]
+Defense_clean <- Defense_clean[!(Defense_clean$defense_rank == ""), ]
+
+#Modify strings to proper names
+Defense_clean <- Defense_clean %>%  
+  mutate(team = str_replace(team, "Football Team", "Commanders")) %>% 
+  mutate(team = str_replace(team, "Redskins", "Commanders")) %>%
+  mutate(team = str_replace(team, "Oakland", "Las Vegas")) %>%
+  mutate(team = str_replace(team, "St. Louis", "Los Angeles")) %>%
+  mutate(team = str_replace(team, "San Diego", "Los Angeles")) %>%
+  mutate(team = str_replace(team, "Tampa Bay", "Tampa Bay"))
+
+#Defense_clean<-left_join(Defense_clean, Teams, by = "team")
+
+
+#Remove columns
+Defense_clean[, 3:28] <- (NULL)
+
+#Changed the column classes of df
+Defense_clean <- type.convert(Defense_clean, as.is = TRUE)
+
+#----------------Cleaning "Draft"data frame-----------------------------------------------------------------------
+Draft_clean <- Draft
+
+Draft_clean <- rename(Draft_clean, round_drafted=Var.1, pick=Var.2, 
+                      player=Var.4, position=Var.5) #Renaming some of the column names
+
+#Removed characters and punctuation from Year column
+Draft_clean$player <- gsub(" HOF", "", Draft_clean$player)
+Draft_clean$player <- gsub("Michael Vick", "Mike Vick", Draft_clean$player)
+Draft_clean$player <- gsub("Mitchell Trubisky", "Mitch Trubisky", Draft_clean$player)
+Draft_clean$player <- sub("Robert Griffin III", "Robert Griffin", Draft_clean$player)
+
+#Remove whitespace from column
+Draft_clean$player <- trimws(Draft_clean$player, which = "both")
+
+
+#cleaning data frame by removing unecessary rows using value in the row
+Draft_clean <- Draft_clean[(Draft_clean$position == "QB"),]
+
+#Removed columns that aren't need for analysis
+
+#Changing NAs to Undrafted
+Draft_clean[is.na(Draft_clean)] <- "Undrafted"
+
+
+Draft_clean <- Draft_clean %>% 
+  select(-c(position:Var.29, Var.3, pick))
+
+
+#Changed the column classes of df
+Draft_clean <- type.convert(Draft_clean, as.is = TRUE)
+
+
+#----------------Cleaning "Suberbowl"data frame-----------------------------------------------------------------------
+#Removed all special characters from dataframe for cleaning
+sb_clean<-sb %>%
+  mutate(across(everything(), ~gsub("[[:punct:]]", "", .x)))
+
+# Removed the last character from Team and Team.1 column, for cleaning
+sb_clean$Team <- str_sub(sb_clean$Team, end = -2)
+sb_clean$Team.1 <- str_sub(sb_clean$Team.1, end = -2)
+
+# Modifying strings for cleaning
+sb_clean$Winning.QB <-gsub("MVP","",as.character(sb_clean$Winning.QB ))
+sb_clean$Season <- gsub("AFLNFL", "", sb_clean$Season)
+
+#Changing column strings
+sb_clean <- sb_clean %>%  
+  select(-Super.Bowl) %>% 
+  mutate(Team = str_replace(Team, "Redskins", "Commanders")) %>%
+  mutate(Team.1 = str_replace(Team.1, "Redskins", "Commanders")) %>%
+  mutate(Team = str_replace(Team, "Oakland", "Las Vegas")) %>%
+  mutate(Team.1 = str_replace(Team.1, "Oakland", "Las Vegas")) %>%
+  mutate(Team = str_replace(Team, "St. Louis", "Los Angeles")) %>%
+  mutate(Team.1 = str_replace(Team.1, "St. Louis", "Los Angeles")) %>%
+  mutate(Team = str_replace(Team, "San Diego", "Los Angeles")) %>%
+  mutate(Team.1 = str_replace(Team.1, "San Diego", "Los Angeles")) %>%
+  mutate(Team = str_replace(Team, "Tampa Bay", "Tampa Bay")) %>% 
+  mutate(Team.1 = str_replace(Team.1, "Tampa Bay", "Tampa Bay")) %>% 
+  mutate(superbowlqb = ifelse(!is.na(sb_clean$Winning.QB), 'yes', 'yes')) %>% 
+  rename(Winning_team=Team, Losing_team=Team.1, Year=Season, Winning_qb=Winning.QB, Losing_qb=Losing.QB)
+  
+
+#Deleted row 57 for cleaning 
+sb_clean <- sb_clean[-58,]
+
+
+#Removed Suberbowls before 2001
+sb_clean <-sb_clean[sb_clean$Year > "2001"  & sb_clean$Year < "2022",]
+
+
+
+#Made new DF where to converted two colomns to rows to easier join dfs
+sb_clean <- data.frame(year = c(sb_clean[,"Year"], sb_clean[,"Year"]),
+                               player = c(sb_clean[,"Winning_qb"], sb_clean[,"Losing_qb"]),
+                                superbowl = c(sb_clean[,"superbowlqb"], sb_clean[,"superbowlqb"]),
+                              team = c(sb_clean[,"Winning_team"], sb_clean[,"Losing_team"]))
+
+#adding new column
+sb_clean <- sb_clean%>%
+  mutate(sb_winner=c("yes"))
+  sb_clean[21:40, 5] = "no"
+
+#Changed the column classes of df
+sb_clean <- type.convert(sb_clean, as.is = TRUE)
+
+#combining dfs
+sb_clean <- left_join(sb_clean, Draft_clean, by = "player")
+
+#Changing NA's to Undrafted
+sb_clean[is.na(sb_clean)] <- "Undrafted"
+
+
+#-----------------Cleaning "Playoff"data frame------------------------------------------------------------------------------------
+playoff_clean <- QBPlayoffs
+
+#Remove columns
+playoff_clean[, 4:16] <- (NULL)
+playoff_clean[, 1] <- (NULL)
+
+#Modify column
+playoff_clean$Year <-gsub(".html", "", playoff_clean$Year)
+
+#cleaning data frame by removing unecessary rows using value in the row
+playoff_clean <- playoff_clean[(playoff_clean$POS == "QB"),]
+
+#create new column Team_code
+playoff_clean <- playoff_clean %>% 
+  mutate(team_code = str_extract(playoff_clean$Name,"[A-Z/]+$")) %>% 
+  dplyr::rename(playoff_rtg=RTG, year=Year, player=Name)
+
+#Trimmed the Name column to remove the Team_code from the name
+playoff_clean$player <- trimws(playoff_clean$player, whitespace = "[A-Z/]+", which = "right")
+
+
+#Fixed one record where "III"needed to be added to one column and removed from another
+playoff_clean$team_code <- sub("IIIWSH", "WSH", playoff_clean$team_code)
+playoff_clean$player <- sub("Robert Griffin III", "Robert Griffin", playoff_clean$player)
+
+#Removing white space from column
+playoff_clean$player <- trimws(playoff_clean$player, which = "both")
+
+#Changing column strings
+playoff_clean <- playoff_clean %>%  
+  mutate(team_code = str_replace(team_code, "OAK", "LV")) %>%
+  mutate(team_code = str_replace(team_code, "STL", "LAR")) %>%
+  mutate(team_code = str_replace(team_code, "SD", "LAR")) %>% 
+  mutate(team_code = str_replace(team_code, "WSH", "WAS")) 
+  
+
+
+
+
+#joining data frames
+playoff_clean<-left_join(playoff_clean, Teams, by = "team_code")
+
+#removed columns
+playoff_clean<-playoff_clean %>% 
+  select(-team_code, -POS)
+
+#Changed the column classes of df
+playoff_clean <- type.convert(playoff_clean, as.is = TRUE)
+
+
+#-----------------Cleaning "Regular Season"data frame-----------------------------------------------------------------
+Regsea_clean<-Regsea
+
+#create new column Team_code
+Regsea_clean <- Regsea_clean %>% 
+  mutate(team_code = str_extract(Regsea_clean$Name,"[A-Z/]+$")) %>% 
+  dplyr::rename(player=Name, year=Year, rtg=RTG)
+
+#Trimmed the Name column to remove the Team_code from the name
+Regsea_clean$player <- trimws(Regsea_clean$player, whitespace = "[A-Z/]+", which = "right")
+
+
+#Fixed one record where "III"needed to be added to one column and removed from another
+Regsea_clean$team_code <- sub("IIIWSH", "WSH", Regsea_clean$team_code)
+Regsea_clean$team_code <- sub("IIICLE", "CLE", Regsea_clean$team_code)
+Regsea_clean$player <- sub("Robert Griffin III", "Robert Griffin", Regsea_clean$player)
+
+
+#Removing white space from column	
+Regsea_clean$player <- trimws(Regsea_clean$player, which = "both")
+
+#Changing column strings
+Regsea_clean <- Regsea_clean %>%  
+  mutate(team_code = str_replace(team_code, "OAK", "LV")) %>%
+  mutate(team_code = str_replace(team_code, "STL", "LAR")) %>%
+  mutate(team_code = str_replace(team_code, "SD", "LAC")) %>% 
+  mutate(team_code = str_replace(team_code, "WSH", "WAS")) 
+
+#Removed characters and punctuation from Year column
+Regsea_clean$year <- gsub("regseason", "", Regsea_clean$year) 
+Regsea_clean$year <- gsub(".HTML", "", Regsea_clean$year)
+
+
+
+
+#Changed the column classes of df
+Regsea_clean <- type.convert(Regsea_clean, as.is = TRUE)
+
+#Remove columns
+Regsea_clean[, 3:16] <- (NULL)
+
+Regsea_clean[, 1] <- (NULL)
+
+#Combining dfs
+Regsea_clean<-left_join(Regsea_clean, Teams, by = "team_code")
+#removed columns
+Regsea_clean<-Regsea_clean %>% 
+  select(-team_code)
+Regsea_clean<-left_join(Regsea_clean, Draft_clean, by = "player")
+#Changing NA's to Undrafted
+Regsea_clean[is.na(Regsea_clean)] <- "Undrafted"
+
+Regsea_clean<-left_join(Regsea_clean, playoff_clean, by = c("player","team","year"))
+Regsea_clean1<-left_join(Regsea_clean, Defense_clean, by = c("team","year"))
+
+
+qb_final<-left_join(Regsea_clean1, sb_clean, by =c("player","year","team","round_drafted"))
+
+qb_final <- qb_final %>% 
+  mutate(sb_winner = ifelse(is.na(sb_winner), "no", sb_winner)) %>% 
+  mutate(superbowl = ifelse(is.na(superbowl), "no", superbowl)) 
+
+qb_final <- type.convert(qb_final, as.is = TRUE)
+```
+
+
+```{r loading Excel file into dataframe, echo=FALSE, message=FALSE, warning=FALSE}
+setwd("C:/Users/Darnell W/Desktop/R_DASHBOARDS")
+qb_final <- read_xlsx("C:/Users/Darnell W/Desktop/R_DASHBOARDS/flex_dashboards/qbfinal.xlsx")
+```
+### In this graph I used a boxplot to show the number of of quarterbacks that made the playoffs from 2002 to 2021.
+
+
+* The results shown in this boxplot show that over the period of 2002 to 2021 that the majority of the quarterbacks that made it to the playoffs were drafted in the first round.
+
+```{r boxplot, echo=FALSE, warning=FALSE}
+qb_final %>% 
+  filter(!is.na(playoff_rtg)) %>% 
+  mutate(across(c('rtg'), round, 0)) %>% 
+  group_by(round_drafted) %>% 
+  ggplot(aes(x=round_drafted, y=rtg, color=round_drafted)) + 
+  geom_boxplot() +
+  geom_jitter() +
+  labs(
+    title= "Playoff Qaurterbacks",
+    subtitle = "2002-2021",
+    x = "Round Drafted",
+    y = "QB Rating (Average)") +
+  theme(legend.position = "none",
+        plot.title=element_text(hjust=0.5, size = 10),
+        plot.subtitle=element_text(hjust=0.5, size = 8))
+```
+
+
+### Here I used a lollipop chart to show how the average quarterback rating compare based on the round drafted.
+
+* The results shown in this bar chart shows that even though quarterbacks drafted in the 1st and 2nd round were tie with the highest average quarterback rating, the next it's within five points of the next five positions.  
+
+```{r QB rating dataframe, echo=FALSE, warning=FALSE}
+rtg<-qb_final %>% 
+  group_by(round_drafted) %>% 
+  summarize(across(c("rtg"), ~ mean(.x, na.rm = TRUE))) %>% 
+  arrange(desc(rtg))
+```
+```{r lollipop chart, echo=FALSE, warning=FALSE}
+rtg %>%
+  mutate(round_drafted = fct_reorder(round_drafted, rtg)) %>%
+  mutate(across(c('rtg'), round, 0)) %>% 
+  ggplot( aes(x=round_drafted, y=rtg, fill = round_drafted)) +
+  geom_point(size = 6) +
+  geom_segment(aes(x = round_drafted, xend = round_drafted, 
+                   y = 0, yend = rtg), linewidth = 2.5) +
+  scale_y_continuous(limits = c(0, 90), breaks = c(0, 15, 30, 45, 60, 75, 90)) +
+  geom_label(aes(label = rtg), size = 8) +
+  labs(title = "Average QB Rating 02'-21'",
+       
+       y = "Quartback Rating",
+       x = "Round Drafted") +
+  theme(legend.position = "none",
+        plot.title=element_text(size = 10),
+        plot.subtitle=element_text(size = 9),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        axis.text = element_text(size = 10)) +
+  coord_flip() 
+```
+
+
+### This bar chart shows the average defensive ranking of quarterbacks by round drafted.
+
+* This chart shows the average defensive ranking of quarterbacks for the first, second, and third round were the same.  The quarterbacks who were drafted in the fourth, sixth, or undrafted were only one ranking lower.
+
+```{r defensive ranking dataframe, echo=FALSE, warning=FALSE}
+defense_rank <-
+qb_final %>% 
+  dplyr::group_by(round_drafted) %>% 
+  dplyr::summarize(across(c("defense_rank"), ~ mean(.x, na.rm = TRUE))) %>% 
+  arrange(defense_rank)
+```
+```{r bar chart, echo=FALSE, warning=FALSE}
+defense_rank %>%
+  mutate(round_drafted = fct_reorder(round_drafted, defense_rank)) %>%
+  mutate(across(c('defense_rank'), round, 0)) %>% 
+  ggplot(aes(x = as.factor(round_drafted), y = defense_rank, fill=as.factor(round_drafted) )) +
+  geom_col() + 
+ 
+  geom_label(aes(label = defense_rank), size = 8) +
+  labs(subtitle="2002-2021", 
+       title= "Defense Rankings of Quarterbacks",
+       y="Defense Rank (Average)", 
+       x="Round Drafted")+
+  theme(legend.position = "none",
+        plot.title=element_text(hjust=0.5, size = 10),
+        plot.subtitle=element_text(hjust=0.5, size = 9),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        axis.text = element_text(size = 10))
+```
+
+### This facet plot shows the number of different quarterbacks that participated in the Superbowl from 2002-2021.
+
+* In this plot it shows how more quarterback from the first round participated in the last twenty Superbowls than all others combined.
+
+```{r facet plot, echo=FALSE, warning=FALSE}
+qb_final %>% 
+  group_by(round_drafted, player) %>% 
+  filter(superbowl =="yes") %>% 
+  summarize_at(vars(rtg), list(group = mean)) %>% 
+  mutate(round_drafted = str_replace(round_drafted, "1", "Round 1")) %>% 
+  mutate(round_drafted = str_replace(round_drafted, "2", "Round 2")) %>%
+  mutate(round_drafted = str_replace(round_drafted, "3", "Round 3")) %>%
+  mutate(round_drafted = str_replace(round_drafted, "4", "Round 4")) %>%
+  mutate(round_drafted = str_replace(round_drafted, "6", "Round 6")) %>%
+  mutate(round_drafted = str_replace(round_drafted, "9", "Round 9")) %>% 
+  #mutate(round_drafted = str_replace(round_drafted, "NA", "Undrafted")) %>% 
+  ggplot(aes(x = player, y = group,  color = group))  +
+  geom_point(size = 3) +
+  facet_wrap(~round_drafted) +
+  theme(legend.position="none",
+        strip.background = element_rect(colour="black",
+                                        fill="white"),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        plot.subtitle=element_text(hjust=0.5, size = 14),
+        plot.title=element_text(hjust=0.5, size = 20),
+  ) +
+  labs(
+    title= "Superbowl QBs 02'-21'",
+    
+    x = "Quarterbacks",
+    y = "Playoff Rating (Average)")
+```
+
+### Conclusion
+* The data has shown that over the twenty year period that teams with a quarterback drafted in the first round have a not only made the playoffs more, they also were more likely to make it to the Superbowl.
+* The data also shows that with the exception of quarterbacks drafted in the fifth round, the average passer rating of all quarterbacks is within seven points.
+* When I look at the defensive rankings based on round drafted, only quarterbacks drafted in the ninth round had a defense in the top fifteen.  Out of 32 teams most defenses were ranked in the bottom half of the league.
+* Taking in the whole picture the data shows that since most quarterbacks having similar passer ratings and defensive rankings, that drafting a quarterback in the first round is a team's best chance to make the playoffs or the Superbowl.
