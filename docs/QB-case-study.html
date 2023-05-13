@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Cornelius Williams" />
+
+<meta name="date" content="2023-05-13" />
+
+<title>NFL QB Case Study</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">NFL QB Case Study</h1>
+<h4 class="author">Cornelius Williams</h4>
+<h4 class="date">2023-05-13</h4>
+
+</div>
+
+
+<div id="questions-to-be-answered" class="section level2">
+<h2>Questions to be answered</h2>
+<ol style="list-style-type: decimal">
+<li>Does it take a good defense to win the Superbowl?</li>
+<li>Does it take a great quarterback play to win the Superbowl?</li>
+<li>Does it matter which round a team drafts a quarterback?</li>
+<li>Can a team draft a quarterback in a later round and pair them with a
+good defense to win?</li>
+<li>Which rounds are quarterbacks that make it to the playoffs and
+Superbowl drafted in?</li>
+</ol>
+<div
+id="in-my-data-analysis-case-study-i-set-out-to-answer-these-questions-by-gathering-data-over-a-twenty-year-period-that-included-information-listed-below."
+class="section level3">
+<h3>In my data analysis case study I set out to answer these questions
+by gathering data over a twenty year period that included information
+listed below.</h3>
+<ul>
+<li>NFL defensive stats</li>
+<li>Quarterback regular season and playoff stats</li>
+<li>Superbowl team and quarterback participants</li>
+<li>Rounds that each quarterback was drafted</li>
+</ul>
+</div>
+<div
+id="in-this-graph-i-used-a-boxplot-to-show-the-number-of-of-quarterbacks-that-made-the-playoffs-from-2002-to-2021."
+class="section level3">
+<h3>In this graph I used a boxplot to show the number of of quarterbacks
+that made the playoffs from 2002 to 2021.</h3>
+<ul>
+<li>The results shown in this boxplot show that over the period of 2002
+to 2021 that the majority of the quarterbacks that made it to the
+playoffs were drafted in the first round.</li>
+</ul>
+<p><img src="QB-case-study_files/figure-html/boxplot-1.png" width="672" /></p>
+</div>
+<div
+id="here-i-used-a-lollipop-chart-to-show-how-the-average-quarterback-rating-compare-based-on-the-round-drafted."
+class="section level3">
+<h3>Here I used a lollipop chart to show how the average quarterback
+rating compare based on the round drafted.</h3>
+<ul>
+<li>The results shown in this bar chart shows that even though
+quarterbacks drafted in the 1st and 2nd round were tie with the highest
+average quarterback rating, the next it’s within five points of the next
+five positions.</li>
+</ul>
+<p><img src="QB-case-study_files/figure-html/lollipop%20chart-1.png" width="672" /></p>
+</div>
+<div
+id="this-bar-chart-shows-the-average-defensive-ranking-of-quarterbacks-by-round-drafted."
+class="section level3">
+<h3>This bar chart shows the average defensive ranking of quarterbacks
+by round drafted.</h3>
+<ul>
+<li>This chart shows the average defensive ranking of quarterbacks for
+the first, second, and third round were the same. The quarterbacks who
+were drafted in the fourth, sixth, or undrafted were only one ranking
+lower.</li>
+</ul>
+<p><img src="QB-case-study_files/figure-html/bar%20chart-1.png" width="672" /></p>
+</div>
+<div
+id="this-facet-plot-shows-the-number-of-different-quarterbacks-that-participated-in-the-superbowl-from-2002-2021."
+class="section level3">
+<h3>This facet plot shows the number of different quarterbacks that
+participated in the Superbowl from 2002-2021.</h3>
+<ul>
+<li>In this plot it shows how more quarterback from the first round
+participated in the last twenty Superbowls than all others
+combined.</li>
+</ul>
+<p><img src="QB-case-study_files/figure-html/facet%20plot-1.png" width="672" /></p>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<ul>
+<li>The data has shown that over the twenty year period that teams with
+a quarterback drafted in the first round have a not only made the
+playoffs more, they also were more likely to make it to the
+Superbowl.</li>
+<li>The data also shows that with the exception of quarterbacks drafted
+in the fifth round, the average passer rating of all quarterbacks is
+within seven points.</li>
+<li>When I look at the defensive rankings based on round drafted, only
+quarterbacks drafted in the ninth round had a defense in the top
+fifteen. Out of 32 teams most defenses were ranked in the bottom half of
+the league.</li>
+<li>Taking in the whole picture the data shows that since most
+quarterbacks having similar passer ratings and defensive rankings, that
+drafting a quarterback in the first round is a team’s best chance to
+make the playoffs or the Superbowl.</li>
+</ul>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
