@@ -34,6 +34,14 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="site_libs/jexcel-3.9.1/css/jexcel.min.css" rel="stylesheet" />
+<link href="site_libs/jexcel-3.9.1/css/jsuites.css" rel="stylesheet" />
+<link href="site_libs/jexcel-3.9.1/css/materialicon/material-icons.css" rel="stylesheet" />
+<link href="site_libs/jexcel-3.9.1/css/custom.css" rel="stylesheet" />
+<script src="site_libs/jexcel-3.9.1/js/jexcel.min.js"></script>
+<script src="site_libs/jexcel-3.9.1/js/jsuites.js"></script>
+<script src="site_libs/jexcel-binding-0.4.0/jexcel.js"></script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -169,30 +177,358 @@ pre code {
 </div>
 
 
-<div id="questions-to-be-answered" class="section level2">
-<h2>Questions to be answered</h2>
+<div id="section" class="section level1 tabset">
+<h1 class="tabset"></h1>
+<div id="ask" class="section level2">
+<h2>Ask</h2>
+<p>*I’m a data analyst working for a fictitious professional football
+team that’s looking to find out what’s the best path to having a
+successful team that can make the playoffs and ultimately the Superbowl.
+My job is to look at various sources of data to help the team I’m on
+present our findings to the executive board of the team.</p>
+<div id="questions" class="section level3">
+<h3>Questions</h3>
 <ol style="list-style-type: decimal">
-<li>Does it take a good defense to win the Superbowl?</li>
-<li>Does it take a great quarterback play to win the Superbowl?</li>
-<li>Does it matter which round a team drafts a quarterback?</li>
-<li>Can a team draft a quarterback in a later round and pair them with a
-good defense to win?</li>
-<li>Which rounds are quarterbacks that make it to the playoffs and
-Superbowl drafted in?</li>
+<li><p>Does it take a good defense to win the Superbowl?</p></li>
+<li><p>Does it take a great quarterback play to win the
+Superbowl?</p></li>
+<li><p>Does it matter which round a team drafts a quarterback?</p></li>
+<li><p>Can a team draft a quarterback in a later round and pair them
+with a good defense to win?</p></li>
+<li><p>Which rounds are quarterbacks that make it to the playoffs and
+Superbowl drafted in? <img src="football.jpg" /> Image from <a
+href="https://pixabay.com" class="uri">https://pixabay.com</a></p></li>
 </ol>
-<div
-id="in-my-data-analysis-case-study-i-set-out-to-answer-these-questions-by-gathering-data-over-a-twenty-year-period-that-included-information-listed-below."
-class="section level3">
-<h3>In my data analysis case study I set out to answer these questions
-by gathering data over a twenty year period that included information
-listed below.</h3>
-<ul>
-<li>NFL defensive stats</li>
-<li>Quarterback regular season and playoff stats</li>
-<li>Superbowl team and quarterback participants</li>
-<li>Rounds that each quarterback was drafted</li>
-</ul>
 </div>
+</div>
+<div id="prepare" class="section level2">
+<h2>Prepare</h2>
+<ul>
+<li>I determine that to answer these questions I would need various
+types of data</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>NFL defensive stats</li>
+<li>Quarterback regular season stats</li>
+<li>Quarterback playoff season stats</li>
+<li>Superbowl results</li>
+<li>NFL draft information</li>
+</ol>
+<ul>
+<li>After I determined what data would be needed to complete answer my
+questions, I set out to gather that data from various websites and
+stored it in local files using R packages listed below.</li>
+</ul>
+<pre class="r"><code>install.packages(&quot;rvest&quot;)
+install.packages(&quot;dplyr&quot;)
+install.packages(&quot;stringr&quot;)
+install.packages(&quot;xml2&quot;)
+install.packages(&quot;readxl&quot;)
+install.packages(&quot;write_xl&quot;)
+
+library(rvest)
+library(dplyr)
+library(stringr)
+library(xml2)
+library(readxl)
+library(writexl)</code></pre>
+<ul>
+<li>Code used to gather and store data</li>
+</ul>
+<pre class="r"><code>setwd(&quot;C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/defense&quot;)
+for(i in 2002:2021){
+  defense_url &lt;- read_html(paste0(&quot;https://www.pro-football-reference.com/years/&quot;,i,&quot;/opp.htm&quot;))
+  defense_stats &lt;- defense_url %&gt;%
+    write_html(paste0(&quot;defense&quot;,i,&quot;.HTML&quot;))
+}
+
+
+setwd(&quot;C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/passing&quot;)
+for(i in 2002:2021){
+  passing_url &lt;- read_html(paste0(&quot;https://www.espn.com/nfl/stats/player/_/season/&quot;,i,&quot;/seasontype/3/table/passing/sort/QBRating/dir/desc&quot;))
+  passing_stats &lt;- passing_url %&gt;%
+    write_html(paste0(&quot;passing&quot;,i,&quot;.HTML&quot;))
+}
+
+
+setwd(&quot;C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/reg_season&quot;)
+for(i in 2002:2021){
+  regsea_url &lt;- read_html(paste0(&quot;https://www.espn.com/nfl/stats/player/_/season/&quot;,i,&quot;/seasontype/2/table/passing/sort/QBRating/dir/desc&quot;))
+  regsea_stats &lt;- regsea_url %&gt;%
+    write_html(paste0(&quot;regseason&quot;,i,&quot;.HTML&quot;))
+}
+
+setwd(&quot;C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/draft&quot;)
+for (i in 1986:2021) {
+  draft_url &lt;- read_html(paste0(&quot;https://www.pro-football-reference.com/years/&quot;,i,&quot;/draft.htm&quot;))
+  draft_stats &lt;- draft_url %&gt;%
+    write_html(paste0(&quot;draft&quot;,i,&quot;.HTML&quot;))
+}
+
+
+setwd(&quot;C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/superbowl&quot;)
+sb_url &lt;- read_html(&quot;https://en.wikipedia.org/wiki/List_of_Super_Bowl_starting_quarterbacks&quot;)
+superbowl &lt;- sb_url %&gt;%
+  write_html(&quot;suberbowl.HTML&quot;)
+}
+
+setwd(&quot;C:/Users/Darnell W/Desktop/Portfolio/R practice/NFL Project/Team_abbreviations&quot;)
+teamAbr_url &lt; read_html(&quot;https://en.wikipedia.org/wiki/Wikipedia:WikiProject_National_Football_League/National_Football_League_team_abbreviations&quot;)
+Teams &lt;- teamAbr_url %&gt;%
+  write_html(&quot;Team_abreviations.csv&quot;)
+}</code></pre>
+</div>
+<div id="cleaning" class="section level2">
+<h2>Cleaning</h2>
+<ul>
+<li>I cleaned each of the six dataframes. I then joined the dataframes
+until I ended up with one final dataframe to use for my
+visualizations</li>
+</ul>
+<pre class="r"><code>#cleaning Teams data frame
+Teams &lt;- Teams %&gt;% 
+  select(-ID, -Conference, -Division)
+
+Teams &lt;- rename(Teams, team_code=Abbreviation)
+Teams &lt;- rename(Teams, team=Name)
+
+#cleaning Defense data frame
+Defense_clean &lt;- Defense
+
+#removed characters and punctuation from Year column
+Defense_clean$Year &lt;- gsub(&quot;defense&quot;, &quot;&quot;, Defense_clean$Year) 
+Defense_clean$Year &lt;- gsub(&quot;.HTML&quot;, &quot;&quot;, Defense_clean$Year)
+
+#renaming some of the column names
+Defense_clean &lt;- dplyr::rename(Defense_clean, team=Var.2, 
+                        defense_rank=Var.1, year=Year)
+#cleaning data frame by removing unecessary rows using value in the row
+Defense_clean &lt;- Defense_clean[!(Defense_clean$defense_rank == &quot;Rk&quot;),]
+Defense_clean &lt;- Defense_clean[!(Defense_clean$defense_rank == &quot;&quot;), ]
+
+#modify strings to proper names
+Defense_clean &lt;- Defense_clean %&gt;%  
+  mutate(team = str_replace(team, &quot;Football Team&quot;, &quot;Commanders&quot;)) %&gt;% 
+  mutate(team = str_replace(team, &quot;Redskins&quot;, &quot;Commanders&quot;)) %&gt;%
+  mutate(team = str_replace(team, &quot;Oakland&quot;, &quot;Las Vegas&quot;)) %&gt;%
+  mutate(team = str_replace(team, &quot;St. Louis&quot;, &quot;Los Angeles&quot;)) %&gt;%
+  mutate(team = str_replace(team, &quot;San Diego&quot;, &quot;Los Angeles&quot;)) %&gt;%
+  mutate(team = str_replace(team, &quot;Tampa Bay&quot;, &quot;Tampa Bay&quot;))
+
+#remove columns
+Defense_clean[, 3:28] &lt;- (NULL)
+
+#changed the column classes of df
+Defense_clean &lt;- type.convert(Defense_clean, as.is = TRUE)
+
+#cleaning Draft data frame
+Draft_clean &lt;- Draft
+
+Draft_clean &lt;- rename(Draft_clean, round_drafted=Var.1, pick=Var.2, 
+                      player=Var.4, position=Var.5) #Renaming some of the column names
+
+#removed characters and punctuation from Year column
+Draft_clean$player &lt;- gsub(&quot; HOF&quot;, &quot;&quot;, Draft_clean$player)
+Draft_clean$player &lt;- gsub(&quot;Michael Vick&quot;, &quot;Mike Vick&quot;, Draft_clean$player)
+Draft_clean$player &lt;- gsub(&quot;Mitchell Trubisky&quot;, &quot;Mitch Trubisky&quot;, Draft_clean$player)
+Draft_clean$player &lt;- sub(&quot;Robert Griffin III&quot;, &quot;Robert Griffin&quot;, Draft_clean$player)
+
+#remove whitespace from column
+Draft_clean$player &lt;- trimws(Draft_clean$player, which = &quot;both&quot;)
+
+
+#cleaning data frame by removing unecessary rows using value in the row
+Draft_clean &lt;- Draft_clean[(Draft_clean$position == &quot;QB&quot;),]
+
+#removed columns that aren&#39;t need for analysis
+
+#changing NAs to Undrafted
+Draft_clean[is.na(Draft_clean)] &lt;- &quot;Undrafted&quot;
+
+Draft_clean &lt;- Draft_clean %&gt;% 
+  select(-c(position:Var.29, Var.3, pick))
+
+#changed the column classes of df
+Draft_clean &lt;- type.convert(Draft_clean, as.is = TRUE)
+
+#cleaning Superbowl data frame
+#removed all special characters from dataframe for cleaning
+sb_clean&lt;-sb %&gt;%
+  mutate(across(everything(), ~gsub(&quot;[[:punct:]]&quot;, &quot;&quot;, .x)))
+
+#removed the last character from Team and Team.1 column, for cleaning
+sb_clean$Team &lt;- str_sub(sb_clean$Team, end = -2)
+sb_clean$Team.1 &lt;- str_sub(sb_clean$Team.1, end = -2)
+
+#modifying strings for cleaning
+sb_clean$Winning.QB &lt;-gsub(&quot;MVP&quot;,&quot;&quot;,as.character(sb_clean$Winning.QB ))
+sb_clean$Season &lt;- gsub(&quot;AFLNFL&quot;, &quot;&quot;, sb_clean$Season)
+
+#changing column strings
+sb_clean &lt;- sb_clean %&gt;%  
+  select(-Super.Bowl) %&gt;% 
+  mutate(Team = str_replace(Team, &quot;Redskins&quot;, &quot;Commanders&quot;)) %&gt;%
+  mutate(Team.1 = str_replace(Team.1, &quot;Redskins&quot;, &quot;Commanders&quot;)) %&gt;%
+  mutate(Team = str_replace(Team, &quot;Oakland&quot;, &quot;Las Vegas&quot;)) %&gt;%
+  mutate(Team.1 = str_replace(Team.1, &quot;Oakland&quot;, &quot;Las Vegas&quot;)) %&gt;%
+  mutate(Team = str_replace(Team, &quot;St. Louis&quot;, &quot;Los Angeles&quot;)) %&gt;%
+  mutate(Team.1 = str_replace(Team.1, &quot;St. Louis&quot;, &quot;Los Angeles&quot;)) %&gt;%
+  mutate(Team = str_replace(Team, &quot;San Diego&quot;, &quot;Los Angeles&quot;)) %&gt;%
+  mutate(Team.1 = str_replace(Team.1, &quot;San Diego&quot;, &quot;Los Angeles&quot;)) %&gt;%
+  mutate(Team = str_replace(Team, &quot;Tampa Bay&quot;, &quot;Tampa Bay&quot;)) %&gt;% 
+  mutate(Team.1 = str_replace(Team.1, &quot;Tampa Bay&quot;, &quot;Tampa Bay&quot;)) %&gt;% 
+  mutate(superbowlqb = ifelse(!is.na(sb_clean$Winning.QB), &#39;yes&#39;, &#39;yes&#39;)) %&gt;% 
+  rename(Winning_team=Team, Losing_team=Team.1, Year=Season, Winning_qb=Winning.QB, Losing_qb=Losing.QB)
+  
+
+#deleted row 57 for cleaning 
+sb_clean &lt;- sb_clean[-58,]
+
+#removed Suberbowls before 2001
+sb_clean &lt;-sb_clean[sb_clean$Year &gt; &quot;2001&quot;  &amp; sb_clean$Year &lt; &quot;2022&quot;,]
+
+#made new DF where to converted two colomns to rows to easier join dfs
+sb_clean &lt;- data.frame(year = c(sb_clean[,&quot;Year&quot;], sb_clean[,&quot;Year&quot;]),
+                               player = c(sb_clean[,&quot;Winning_qb&quot;], sb_clean[,&quot;Losing_qb&quot;]),
+                                superbowl = c(sb_clean[,&quot;superbowlqb&quot;], sb_clean[,&quot;superbowlqb&quot;]),
+                              team = c(sb_clean[,&quot;Winning_team&quot;], sb_clean[,&quot;Losing_team&quot;]))
+#adding new column
+sb_clean &lt;- sb_clean%&gt;%
+  mutate(sb_winner=c(&quot;yes&quot;))
+  sb_clean[21:40, 5] = &quot;no&quot;
+
+#changed the column classes of df
+sb_clean &lt;- type.convert(sb_clean, as.is = TRUE)
+
+#combining dfs
+sb_clean &lt;- left_join(sb_clean, Draft_clean, by = &quot;player&quot;)
+
+#changing NA&#39;s to Undrafted
+sb_clean[is.na(sb_clean)] &lt;- &quot;Undrafted&quot;
+
+#cleaning &quot;Playoff&quot;data frame
+playoff_clean &lt;- QBPlayoffs
+
+#remove columns
+playoff_clean[, 4:16] &lt;- (NULL)
+playoff_clean[, 1] &lt;- (NULL)
+
+#modify column
+playoff_clean$Year &lt;-gsub(&quot;.html&quot;, &quot;&quot;, playoff_clean$Year)
+
+#cleaning data frame by removing unecessary rows using value in the row
+playoff_clean &lt;- playoff_clean[(playoff_clean$POS == &quot;QB&quot;),]
+
+#create new column Team_code
+playoff_clean &lt;- playoff_clean %&gt;% 
+  mutate(team_code = str_extract(playoff_clean$Name,&quot;[A-Z/]+$&quot;)) %&gt;% 
+  dplyr::rename(playoff_rtg=RTG, year=Year, player=Name)
+
+#trimmed the Name column to remove the Team_code from the name
+playoff_clean$player &lt;- trimws(playoff_clean$player, whitespace = &quot;[A-Z/]+&quot;, which = &quot;right&quot;)
+
+#fixed one record where &quot;III&quot;needed to be added to one column and removed from another
+playoff_clean$team_code &lt;- sub(&quot;IIIWSH&quot;, &quot;WSH&quot;, playoff_clean$team_code)
+playoff_clean$player &lt;- sub(&quot;Robert Griffin III&quot;, &quot;Robert Griffin&quot;, playoff_clean$player)
+
+#removing white space from column
+playoff_clean$player &lt;- trimws(playoff_clean$player, which = &quot;both&quot;)
+
+#changing column strings
+playoff_clean &lt;- playoff_clean %&gt;%  
+  mutate(team_code = str_replace(team_code, &quot;OAK&quot;, &quot;LV&quot;)) %&gt;%
+  mutate(team_code = str_replace(team_code, &quot;STL&quot;, &quot;LAR&quot;)) %&gt;%
+  mutate(team_code = str_replace(team_code, &quot;SD&quot;, &quot;LAR&quot;)) %&gt;% 
+  mutate(team_code = str_replace(team_code, &quot;WSH&quot;, &quot;WAS&quot;)) 
+  
+#joining data frames
+playoff_clean&lt;-left_join(playoff_clean, Teams, by = &quot;team_code&quot;)
+
+#removed columns
+playoff_clean&lt;-playoff_clean %&gt;% 
+  select(-team_code, -POS)
+
+#changed the column classes of df
+playoff_clean &lt;- type.convert(playoff_clean, as.is = TRUE)
+
+#cleaning Regular Season data frame
+Regsea_clean&lt;-Regsea
+
+#create new column Team_code
+Regsea_clean &lt;- Regsea_clean %&gt;% 
+  mutate(team_code = str_extract(Regsea_clean$Name,&quot;[A-Z/]+$&quot;)) %&gt;% 
+  dplyr::rename(player=Name, year=Year, rtg=RTG)
+
+#trimmed the Name column to remove the Team_code from the name
+Regsea_clean$player &lt;- trimws(Regsea_clean$player, whitespace = &quot;[A-Z/]+&quot;, which = &quot;right&quot;)
+
+#fixed one record where &quot;III&quot;needed to be added to one column and removed from another
+Regsea_clean$team_code &lt;- sub(&quot;IIIWSH&quot;, &quot;WSH&quot;, Regsea_clean$team_code)
+Regsea_clean$team_code &lt;- sub(&quot;IIICLE&quot;, &quot;CLE&quot;, Regsea_clean$team_code)
+Regsea_clean$player &lt;- sub(&quot;Robert Griffin III&quot;, &quot;Robert Griffin&quot;, Regsea_clean$player)
+
+#removing white space from column   
+Regsea_clean$player &lt;- trimws(Regsea_clean$player, which = &quot;both&quot;)
+
+#changing column strings
+Regsea_clean &lt;- Regsea_clean %&gt;%  
+  mutate(team_code = str_replace(team_code, &quot;OAK&quot;, &quot;LV&quot;)) %&gt;%
+  mutate(team_code = str_replace(team_code, &quot;STL&quot;, &quot;LAR&quot;)) %&gt;%
+  mutate(team_code = str_replace(team_code, &quot;SD&quot;, &quot;LAC&quot;)) %&gt;% 
+  mutate(team_code = str_replace(team_code, &quot;WSH&quot;, &quot;WAS&quot;)) 
+
+#removed characters and punctuation from Year column
+Regsea_clean$year &lt;- gsub(&quot;regseason&quot;, &quot;&quot;, Regsea_clean$year) 
+Regsea_clean$year &lt;- gsub(&quot;.HTML&quot;, &quot;&quot;, Regsea_clean$year)
+
+#changed the column classes of df
+Regsea_clean &lt;- type.convert(Regsea_clean, as.is = TRUE)
+
+#remove columns
+Regsea_clean[, 3:16] &lt;- (NULL)
+
+Regsea_clean[, 1] &lt;- (NULL)
+
+#combining dfs
+Regsea_clean&lt;-left_join(Regsea_clean, Teams, by = &quot;team_code&quot;)
+#removed columns
+Regsea_clean&lt;-Regsea_clean %&gt;% 
+  select(-team_code)
+Regsea_clean&lt;-left_join(Regsea_clean, Draft_clean, by = &quot;player&quot;)
+#changing NA&#39;s to Undrafted
+Regsea_clean[is.na(Regsea_clean)] &lt;- &quot;Undrafted&quot;
+
+#combining dfs
+Regsea_clean&lt;-left_join(Regsea_clean, playoff_clean, by = c(&quot;player&quot;,&quot;team&quot;,&quot;year&quot;))
+Regsea_clean1&lt;-left_join(Regsea_clean, Defense_clean, by = c(&quot;team&quot;,&quot;year&quot;))
+
+qb_final&lt;-left_join(Regsea_clean1, sb_clean, by =c(&quot;player&quot;,&quot;year&quot;,&quot;team&quot;,&quot;round_drafted&quot;))
+
+qb_final &lt;- qb_final %&gt;% 
+  mutate(sb_winner = ifelse(is.na(sb_winner), &quot;no&quot;, sb_winner)) %&gt;% 
+  mutate(superbowl = ifelse(is.na(superbowl), &quot;no&quot;, superbowl)) 
+
+qb_final &lt;- type.convert(qb_final, as.is = TRUE)</code></pre>
+</div>
+<div id="analyze" class="section level2">
+<h2>Analyze</h2>
+<ul>
+<li>This is a partial view of the final data frame that was used to
+perform my analysis and visualizations.</li>
+<li>The data frame contains all quarterbacks from 2002 to 2021 along
+with relevant information listed below.</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>The quarterbacks regular season and playoff passing efficiency.</li>
+<li>The ranking of the quarterbacks defense.</li>
+<li>If the quarterback made the playoffs.</li>
+<li>Did the quarterback play in or won the Superbowl.</li>
+</ol>
+<div id="htmlwidget-02cdf31be015361c9bc1" style="width:0px;height:0px;" class="jexcel html-widget "></div>
+<script type="application/json" data-for="htmlwidget-02cdf31be015361c9bc1">{"x":{"data":[["Rich Gannon",97.3,2002,"Las Vegas Raiders","4",84,6,"yes","no"],["Drew Bledsoe",86,2002,"Buffalo Bills","1",null,27,"no","no"],["Peyton Manning",88.8,2002,"Indianapolis Colts","1",31.2,7,"no","no"],["Kerry Collins",85.4,2002,"New York Giants","1",112.7,3,"no","no"],["Daunte Culpepper",75.3,2002,"Minnesota Vikings","1",null,30,"no","no"],["Tom Brady",85.7,2002,"New England Patriots","6",null,17,"no","no"],["Trent Green",92.6,2002,"Kansas City Chiefs","8",null,28,"no","no"],["Brett Favre",85.6,2002,"Green Bay Packers","2",54.4,12,"no","no"],["Aaron Brooks",80.1,2002,"New Orleans Saints","4",null,26,"no","no"],["Steve McNair",84,2002,"Tennessee Titans","1",81.9,11,"no","no"],["Jeff Garcia",85.6,2002,"San Francisco 49ers","Undrafted",68,18,"no","no"],["Drew Brees",76.9,2002,"Los Angeles Chargers","2",null,22,"no","no"],["Brian Griese",85.6,2002,"Denver Broncos","3",null,15,"no","no"],["Jon Kitna",79.1,2002,"Cincinnati Bengals","Undrafted",null,32,"no","no"],["Chad Pennington",104.2,2002,"New York Jets","1",78.8,14,"no","no"],["Matt Hasselbeck",87.8,2002,"Seattle Seahawks","6",null,23,"no","no"],["Brad Johnson",92.9,2002,"Tampa Bay Buccaneers","9",79.9,1,"yes","yes"],["Jake Plummer",65.7,2002,"Arizona Cardinals","2",null,29,"no","no"],["Mike Vick",81.6,2002,"Atlanta Falcons","1",66.3,8,"no","no"],["Tim Couch",76.8,2002,"Cleveland Browns","1",null,10,"no","no"],["Tommy Maddox",85.2,2002,"Pittsburgh Steelers","1",84.2,16,"no","no"],["Mark Brunell",85.7,2002,"Jacksonville Jaguars","5",null,9,"no","no"],["Rodney Peete",77.4,2002,"Carolina Panthers","6",null,5,"no","no"],["David Carr",62.8,2002,"Houston Texans","1",null,20,"no","no"],["Joey Harrington",59.9,2002,"Detroit Lions","1",null,31,"no","no"],["Donovan McNabb",86,2002,"Philadelphia Eagles","1",75.4,2,"no","no"],["Jeff Blake",77.3,2002,"Baltimore Ravens","6",null,19,"no","no"],["Jay Fiedler",85.2,2002,"Miami Dolphins","Undrafted",null,4,"no","no"],["Jim Miller",77.5,2002,"Chicago Bears","6",null,25,"no","no"],["Marc Bulger",101.5,2002,"Los Angeles Rams","6",null,24,"no","no"],["Chad Hutchinson",66.3,2002,"Dallas Cowboys","Undrafted",null,13,"no","no"],["Patrick Ramsey",71.8,2002,"Washington Commanders","1",null,21,"no","no"],["Quincy Carter",72.3,2002,"Dallas Cowboys","2",null,13,"no","no"],["Kurt Warner",67.4,2002,"Los Angeles Rams","Undrafted",null,24,"no","no"],["Shane Matthews",72.6,2002,"Washington Commanders","Undrafted",null,21,"no","no"],["Jamie Martin",71.7,2002,"Los Angeles Rams","Undrafted",null,24,"no","no"],["Trent Dilfer",71.1,2002,"Seattle Seahawks","1",null,23,"no","no"],["Kordell Stewart",82.8,2002,"Pittsburgh Steelers","2",null,16,"no","no"],["Ray Lucas",69.9,2002,"Miami Dolphins","Undrafted",null,4,"no","no"],["Chris Redman",76.1,2002,"Baltimore Ravens","3",null,19,"no","no"],["Chris Chandler",79.8,2002,"Chicago Bears","3",null,25,"no","no"],["A.J. Feeley",75.4,2002,"Philadelphia Eagles","5",null,2,"no","no"],["Steve Beuerlein",82.7,2002,"Denver Broncos","4",null,15,"no","no"],["Mike McMahon",52.4,2002,"Detroit Lions","5",null,31,"no","no"],["Kelly Holcomb",92.9,2002,"Cleveland Browns","Undrafted",107.6,10,"no","no"],["Danny Wuerffel",70.9,2002,"Washington Commanders","4",null,21,"no","no"],["Rob Johnson",75.8,2002,"Tampa Bay Buccaneers","4",118.8,1,"no","no"],["Vinny Testaverde",78.3,2002,"New York Jets","1",null,14,"no","no"],["Doug Johnson",78.7,2002,"Atlanta Falcons","Undrafted",118.8,8,"no","no"],["Gus Frerotte",46.1,2002,"Cincinnati Bengals","7",null,32,"no","no"],["Peyton Manning",99,2003,"Indianapolis Colts","1",106.4,20,"no","no"],["Trent Green",92.6,2003,"Kansas City Chiefs","8",92.6,19,"no","no"],["Marc Bulger",81.4,2003,"Los Angeles Rams","6",53.9,17,"no","no"],["Matt Hasselbeck",88.8,2003,"Seattle Seahawks","6",67.4,15,"no","no"],["Brad Johnson",81.5,2003,"Tampa Bay Buccaneers","9",null,4,"no","no"],["Tom Brady",85.9,2003,"New England Patriots","6",84.5,1,"yes","yes"],["Jon Kitna",87.4,2003,"Cincinnati Bengals","Undrafted",null,28,"no","no"],["Aaron Brooks",88.8,2003,"New Orleans Saints","4",null,14,"no","no"],["Daunte Culpepper",96.4,2003,"Minnesota Vikings","1",null,23,"no","no"],["Tommy Maddox",75.3,2003,"Pittsburgh Steelers","1",null,16,"no","no"],["Brett Favre",90.4,2003,"Green Bay Packers","2",94.2,11,"no","no"],["Quincy Carter",71.4,2003,"Dallas Cowboys","2",56.9,2,"no","no"],["Jake Delhomme",80.6,2003,"Carolina Panthers","Undrafted",106.1,10,"yes","no"],["Donovan McNabb",79.6,2003,"Philadelphia Eagles","1",58.6,7,"no","no"],["Steve McNair",100.4,2003,"Tennessee Titans","1",67.5,13,"no","no"],["Kerry Collins",70.7,2003,"New York Giants","1",null,29,"no","no"],["Joey Harrington",63.9,2003,"Detroit Lions","1",null,26,"no","no"],["Drew Bledsoe",73,2003,"Buffalo Bills","1",null,5,"no","no"],["Byron Leftwich",73,2003,"Jacksonville Jaguars","1",null,18,"no","no"],["Jeff Garcia",80.1,2003,"San Francisco 49ers","Undrafted",null,21,"no","no"],["Jeff Blake",69.6,2003,"Arizona Cardinals","6",null,32,"no","no"],["Jake Plummer",91.2,2003,"Denver Broncos","2",74.4,9,"no","no"],["Patrick Ramsey",75.8,2003,"Washington Commanders","1",null,24,"no","no"],["Chad Pennington",82.9,2003,"New York Jets","1",null,8,"no","no"],["Jay Fiedler",72.4,2003,"Miami Dolphins","Undrafted",null,3,"no","no"],["Drew Brees",67.5,2003,"Los Angeles Chargers","2",null,31,"no","no"],["David Carr",69.5,2003,"Houston Texans","1",null,27,"no","no"],["Kelly Holcomb",74.6,2003,"Cleveland Browns","Undrafted",null,12,"no","no"],["Doug Johnson",67.5,2003,"Atlanta Falcons","Undrafted",null,30,"no","no"],["Kordell Stewart",56.8,2003,"Chicago Bears","2",null,22,"no","no"],["Vinny Testaverde",90.6,2003,"New York Jets","1",null,8,"no","no"],["Tim Couch",77.6,2003,"Cleveland Browns","1",null,12,"no","no"],["Rich Gannon",73.5,2003,"Las Vegas Raiders","4",null,25,"no","no"],["Rick Mirer",64.8,2003,"Las Vegas Raiders","1",null,25,"no","no"],["Kyle Boller",62.4,2003,"Baltimore Ravens","1",null,6,"no","no"],["Anthony Wright",72.3,2003,"Baltimore Ravens","Undrafted",57.7,6,"no","no"],["Doug Flutie",82.8,2003,"Los Angeles Chargers","Undrafted",null,31,"no","no"],["Chris Chandler",61.3,2003,"Chicago Bears","3",null,22,"no","no"],["Josh McCown",70.3,2003,"Arizona Cardinals","3",null,32,"no","no"],["Tim Hasselbeck",63.6,2003,"Washington Commanders","Undrafted",null,24,"no","no"],["Tim Rattay",96.6,2003,"San Francisco 49ers","7",null,21,"no","no"],["Brian Griese",69.2,2003,"Miami Dolphins","3",null,3,"no","no"],["Tony Banks",84.3,2003,"Houston Texans","2",null,27,"no","no"],["Gus Frerotte",118.1,2003,"Minnesota Vikings","7",null,23,"no","no"],["Mike Vick",69,2003,"Atlanta Falcons","1",null,30,"no","no"],["Billy Volek",101.4,2003,"Tennessee Titans","Undrafted",null,13,"no","no"],["Jesse Palmer",58.5,2003,"New York Giants","4",null,29,"no","no"],["Mark Brunell",89.7,2003,"Jacksonville Jaguars","5",null,18,"no","no"],["Danny Kanell",49.1,2003,"Denver Broncos","4",null,9,"no","no"],["Rex Grossman",74.8,2003,"Chicago Bears","1",null,22,"no","no"]],"colHeaders":["player","rtg","year","team","round_drafted","playoff_rtg","defense_rank","superbowl","sb_winner"],"columns":[{"type":"text"},{"type":"numeric"},{"type":"numeric"},{"type":"text"},{"type":"text"},{"type":"numeric"},{"type":"numeric"},{"type":"text"},{"type":"text"}],"columnSorting":true,"columnDrag":false,"columnResize":true,"rowResize":false,"rowDrag":true,"editable":true,"allowInsertRow":true,"allowInsertColumn":true,"allowDeleteRow":true,"allowDeleteColumn":true,"allowRenameColumn":true,"allowComments":false,"wordWrap":false,"selectionCopy":true,"search":false,"fullscreen":false,"lazyLoading":false,"loadingSpin":false,"showToolbar":false,"autoWidth":true,"autoFill":false,"getSelectedData":false,"dateFormat":"DD/MM/YYYY"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="share" class="section level2">
+<h2>Share</h2>
 <div
 id="in-this-graph-i-used-a-boxplot-to-show-the-number-of-of-quarterbacks-that-made-the-playoffs-from-2002-to-2021."
 class="section level3">
@@ -245,23 +581,34 @@ combined.</li>
 </div>
 <div id="conclusion" class="section level3">
 <h3>Conclusion</h3>
-<ul>
-<li>The data has shown that over the twenty year period that teams with
-a quarterback drafted in the first round have a not only made the
+<ol style="list-style-type: decimal">
+<li><p>The data has shown that over the twenty year period that teams
+with a quarterback drafted in the first round have a not only made the
 playoffs more, they also were more likely to make it to the
-Superbowl.</li>
-<li>The data also shows that with the exception of quarterbacks drafted
-in the fifth round, the average passer rating of all quarterbacks is
-within seven points.</li>
-<li>When I look at the defensive rankings based on round drafted, only
-quarterbacks drafted in the ninth round had a defense in the top
+Superbowl.</p></li>
+<li><p>The data also shows that with the exception of quarterbacks
+drafted in the fifth round, the average passer rating of all
+quarterbacks is within seven points.</p></li>
+<li><p>When I look at the defensive rankings based on round drafted,
+only quarterbacks drafted in the ninth round had a defense in the top
 fifteen. Out of 32 teams most defenses were ranked in the bottom half of
-the league.</li>
-<li>Taking in the whole picture the data shows that since most
+the league.</p></li>
+<li><p>Taking in the whole picture the data shows that since most
 quarterbacks having similar passer ratings and defensive rankings, that
 drafting a quarterback in the first round is a team’s best chance to
-make the playoffs or the Superbowl.</li>
+make the playoffs or the Superbowl.</p></li>
+</ol>
+</div>
+</div>
+<div id="act" class="section level2">
+<h2>Act</h2>
+<ul>
+<li>With the information given the organization decides to improve their
+chances of sucess and draft a quarterback with the 15th pick of the
+first round of the upcoming draft.</li>
 </ul>
+<p><img src="helmets.jpg" /> Image from <a href="https://pixabay.com"
+class="uri">https://pixabay.com</a></p>
 </div>
 </div>
 
